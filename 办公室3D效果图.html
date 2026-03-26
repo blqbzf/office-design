@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>现代轻工业风办公室 - 3D效果图</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #1a1a1a; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>现代轻工业风办公室</h2>
+        <p>🖱️ 左键拖动：旋转视角</p>
+        <p>🖱️ 滚轮：缩放</p>
+        <p>🖱️ 右键拖动：平移</p>
+    </div>
+    <div id="controls">
+        鼠标交互：拖动旋转 | 滚轮缩放
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // 创建场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf5f5f5);
+        
+        // 创建相机
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 12, 18);
+        camera.lookAt(0, 3, 0);
+        
+        // 创建渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+        
+        // 添加轨道控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2.1;
+        
+        // 材质定义
+        const concreteMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x808080, 
+            roughness: 0.9 
+        });
+        
+        const woodMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x8B7355, 
+            roughness: 0.7 
+        });
+        
+        const whiteMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.5 
+        });
+        
+        const glassMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xadd8e6, 
+            transparent: true, 
+            opacity: 0.3,
+            roughness: 0.1
+        });
+        
+        const blackMetalMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2c2c2c, 
+            roughness: 0.3,
+            metalness: 0.8
+        });
+        
+        const plantMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x7BA05B, 
+            roughness: 0.8 
+        });
+        
+        // 地面（抛光混凝土）
+        const floorGeometry = new THREE.PlaneGeometry(24, 16);
+        const floor = new THREE.Mesh(floorGeometry, concreteMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+        
+        // 墙面（白色）
+        const wallBackGeometry = new THREE.PlaneGeometry(24, 8);
+        const wallBack = new THREE.Mesh(wallBackGeometry, whiteMaterial);
+        wallBack.position.set(0, 4, -8);
+        wallBack.receiveShadow = true;
+        scene.add(wallBack);
+        
+        // 左墙
+        const wallLeftGeometry = new THREE.PlaneGeometry(16, 8);
+        const wallLeft = new THREE.Mesh(wallLeftGeometry, whiteMaterial);
+        wallLeft.rotation.y = Math.PI / 2;
+        wallLeft.position.set(-12, 4, 0);
+        wallLeft.receiveShadow = true;
+        scene.add(wallLeft);
+        
+        // 斜屋顶（木梁结构）
+        for (let i = -10; i <= 10; i += 5) {
+            const beamGeometry = new THREE.BoxGeometry(0.4, 0.4, 18);
+            const beam = new THREE.Mesh(beamGeometry, woodMaterial);
+            beam.position.set(i, 7, 0);
+            beam.rotation.x = Math.PI * 0.05;
+            beam.castShadow = true;
+            scene.add(beam);
+        }
+        
+        // 横梁
+        for (let i = -8; i <= 8; i += 4) {
+            const crossBeamGeometry = new THREE.BoxGeometry(22, 0.3, 0.3);
+            const crossBeam = new THREE.Mesh(crossBeamGeometry, blackMetalMaterial);
+            crossBeam.position.set(0, 6.5, i);
+            crossBeam.castShadow = true;
+            scene.add(crossBeam);
+        }
+        
+        // 形象墙（入口左侧）
+        const featureWallGeometry = new THREE.BoxGeometry(6, 5, 0.3);
+        const featureWall = new THREE.Mesh(featureWallGeometry, concreteMaterial);
+        featureWall.position.set(-8, 2.5, -7.7);
+        featureWall.castShadow = true;
+        scene.add(featureWall);
+        
+        // LOGO 区域（示意）
+        const logoGeometry = new THREE.BoxGeometry(3, 1, 0.1);
+        const logoMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xc0c0c0, 
+            metalness: 0.9,
+            roughness: 0.2
+        });
+        const logo = new THREE.Mesh(logoGeometry, logoMaterial);
+        logo.position.set(-8, 3, -7.5);
+        scene.add(logo);
+        
+        // 中央大楼梯
+        const stairGroup = new THREE.Group();
+        for (let i = 0; i < 12; i++) {
+            const stepGeometry = new THREE.BoxGeometry(4, 0.25, 0.8);
+            const step = new THREE.Mesh(stepGeometry, woodMaterial);
+            step.position.set(-4 + i * 0.15, 0.125 + i * 0.4, 0);
+            step.castShadow = true;
+            stairGroup.add(step);
+        }
+        
+        // 楼梯扶手（黑色金属）
+        const handrailGeometry = new THREE.BoxGeometry(0.1, 5.5, 0.1);
+        const handrail1 = new THREE.Mesh(handrailGeometry, blackMetalMaterial);
+        handrail1.position.set(-6, 2.75, 0.5);
+        handrail1.rotation.z = Math.PI * 0.12;
+        stairGroup.add(handrail1);
+        
+        const handrail2 = handrail1.clone();
+        handrail2.position.x = -2;
+        stairGroup.add(handrail2);
+        
+        stairGroup.position.set(0, 0, 3);
+        scene.add(stairGroup);
+        
+        // 绿植墙（楼梯旁）
+        const greenWallGeometry = new THREE.BoxGeometry(0.3, 6, 4);
+        const greenWall = new THREE.Mesh(greenWallGeometry, plantMaterial);
+        greenWall.position.set(-6.5, 3, 3);
+        greenWall.castShadow = true;
+        scene.add(greenWall);
+        
+        // 绿植装饰球
+        for (let i = 0; i < 8; i++) {
+            const plantGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+            const plant = new THREE.Mesh(plantGeometry, plantMaterial);
+            plant.position.set(-6.3, 1 + i * 0.6, 1 + Math.random() * 4);
+            plant.castShadow = true;
+            scene.add(plant);
+        }
+        
+        // 吧台区域
+        const barCounterGeometry = new THREE.BoxGeometry(5, 1.1, 0.8);
+        const barCounter = new THREE.Mesh(barCounterGeometry, concreteMaterial);
+        barCounter.position.set(7, 0.55, -5);
+        barCounter.castShadow = true;
+        scene.add(barCounter);
+        
+        // 吧台台面（原木）
+        const barTopGeometry = new THREE.BoxGeometry(5.2, 0.1, 1);
+        const barTop = new THREE.Mesh(barTopGeometry, woodMaterial);
+        barTop.position.set(7, 1.15, -5);
+        barTop.castShadow = true;
+        scene.add(barTop);
+        
+        // 吧台吊灯
+        for (let i = -1; i <= 1; i++) {
+            const lampGeometry = new THREE.CylinderGeometry(0.25, 0.3, 0.5, 16);
+            const lampMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2c2c2c, 
+                metalness: 0.9 
+            });
+            const lamp = new THREE.Mesh(lampGeometry, lampMaterial);
+            lamp.position.set(7 + i * 1.5, 5, -5);
+            lamp.castShadow = true;
+            scene.add(lamp);
+            
+            // 灯线
+            const wireGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1.5);
+            const wire = new THREE.Mesh(wireGeometry, blackMetalMaterial);
+            wire.position.set(7 + i * 1.5, 6.25, -5);
+            scene.add(wire);
+        }
+        
+        // 二楼玻璃房
+        const glassRoomGroup = new THREE.Group();
+        
+        // 玻璃墙（前面）
+        const glassWallFrontGeometry = new THREE.BoxGeometry(6, 3, 0.05);
+        const glassWallFront = new THREE.Mesh(glassWallFrontGeometry, glassMaterial);
+        glassWallFront.position.set(0, 1.5, 2);
+        glassRoomGroup.add(glassWallFront);
+        
+        // 玻璃墙（左面）
+        const glassWallLeftGeometry = new THREE.BoxGeometry(0.05, 3, 4);
+        const glassWallLeft = new THREE.Mesh(glassWallLeftGeometry, glassMaterial);
+        glassWallLeft.position.set(-3, 1.5, 0);
+        glassRoomGroup.add(glassWallLeft);
+        
+        // 玻璃墙（右面）
+        const glassWallRight = glassWallLeft.clone();
+        glassWallRight.position.x = 3;
+        glassRoomGroup.add(glassWallRight);
+        
+        // 玻璃房地面
+        const glassFloorGeometry = new THREE.BoxGeometry(6, 0.2, 4);
+        const glassFloor = new THREE.Mesh(glassFloorGeometry, whiteMaterial);
+        glassFloor.position.set(0, 0, 0);
+        glassFloor.castShadow = true;
+        glassRoomGroup.add(glassFloor);
+        
+        // 玻璃房框架（黑色金属）
+        const frameGeometry = new THREE.BoxGeometry(0.1, 3, 0.1);
+        const frame1 = new THREE.Mesh(frameGeometry, blackMetalMaterial);
+        frame1.position.set(-3, 1.5, 2);
+        glassRoomGroup.add(frame1);
+        
+        const frame2 = frame1.clone();
+        frame2.position.x = 3;
+        glassRoomGroup.add(frame2);
+        
+        glassRoomGroup.position.set(-4, 4.8, -3);
+        scene.add(glassRoomGroup);
+        
+        // 二楼平台
+        const mezzanineGeometry = new THREE.BoxGeometry(14, 0.3, 6);
+        const mezzanine = new THREE.Mesh(mezzanineGeometry, whiteMaterial);
+        mezzanine.position.set(0, 4.65, -4);
+        mezzanine.castShadow = true;
+        mezzanine.receiveShadow = true;
+        scene.add(mezzanine);
+        
+        // 灯光设置
+        // 环境光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        
+        // 主光源（模拟天窗）
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        mainLight.position.set(5, 10, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.camera.near = 0.5;
+        mainLight.shadow.camera.far = 50;
+        mainLight.shadow.camera.left = -20;
+        mainLight.shadow.camera.right = 20;
+        mainLight.shadow.camera.top = 20;
+        mainLight.shadow.camera.bottom = -20;
+        scene.add(mainLight);
+        
+        // 补光
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        fillLight.position.set(-5, 8, -5);
+        scene.add(fillLight);
+        
+        // 窗户光
+        const windowLight = new THREE.PointLight(0xffffff, 0.5, 20);
+        windowLight.position.set(11, 4, 0);
+        scene.add(windowLight);
+        
+        // 窗户（右侧）
+        const windowGeometry = new THREE.PlaneGeometry(2, 4);
+        const windowMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x87CEEB, 
+            transparent: true, 
+            opacity: 0.6,
+            emissive: 0x87CEEB,
+            emissiveIntensity: 0.2
+        });
+        
+        for (let i = 0; i < 4; i++) {
+            const window = new THREE.Mesh(windowGeometry, windowMaterial);
+            window.rotation.y = -Math.PI / 2;
+            window.position.set(11.9, 4, -5 + i * 3.5);
+            scene.add(window);
+        }
+        
+        // 动画循环
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // 窗口大小调整
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
